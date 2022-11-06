@@ -22,6 +22,7 @@ namespace SharpDown
         public void Process()
         {
             var text = HeaderEvaluate(Markdown);
+            Console.WriteLine(text);
             text = BoldEvaluate(text);
 
             Console.WriteLine(text);
@@ -44,34 +45,30 @@ namespace SharpDown
         /// <returns>Text with only html headers</returns>
         private string HeaderEvaluate(string text)
         {
-            Regex regex = new Regex(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+");
-            string result = text;
+            Regex regex = new Regex(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             while ((match = regex.Match(text)).Success)
             {
                 string replacement = string.Format("<h{0}>{1}</h{0}>\n", match.Groups[1].Value.Length, match.Groups[2].Value);
-                text = text.Replace(match.Value, "");
-                result = result.Replace(match.Value, replacement);
+                text = text.Replace(match.Value, replacement);
             }
 
-            return result;
+            return text;
         }
 
         private string BoldEvaluate(string text)
         {
-            Regex regex = new Regex(@"(\*{2})[ ]*(.+?)[ ]*\**\n+");
-            string result = text;
+            Regex regex = new Regex(@"\*\*(.*?)\*\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
             
             while ((match = regex.Match(text)).Success)
             {
-                string replacement = string.Format("<strong>{0}</strong>", match.Groups[2].Value);
-                text = text.Replace(match.Value, "");
-                result = result.Replace(match.Value, replacement);
+                string replacement = string.Format("<strong>{0}</strong>", match.Groups[1].Value);
+                text = text.Replace(match.Value, replacement);
             }
 
-            return result;
+            return text;
         }
     }
 }
