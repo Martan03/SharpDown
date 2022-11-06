@@ -22,6 +22,7 @@ namespace SharpDown
         public void Process()
         {
             var text = HeaderEvaluate(Markdown);
+            text = BoldEvaluate(text);
 
             Console.WriteLine(text);
         }
@@ -43,20 +44,34 @@ namespace SharpDown
         /// <returns>Text with only html headers</returns>
         private string HeaderEvaluate(string text)
         {
-            Regex headerRegex = new Regex(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+");
-            Match match = headerRegex.Match(text);
-            StringBuilder result = new();
+            Regex regex = new Regex(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+");
+            string result = text;
+            Match match;
 
-            while (match.Success)
+            while ((match = regex.Match(text)).Success)
             {
                 string replacement = string.Format("<h{0}>{1}</h{0}>\n", match.Groups[1].Value.Length, match.Groups[2].Value);
                 text = text.Replace(match.Value, "");
-                result.Append(replacement);
-
-                match = headerRegex.Match(text);
+                result = result.Replace(match.Value, replacement);
             }
 
-            return result.ToString();
+            return result;
+        }
+
+        private string BoldEvaluate(string text)
+        {
+            Regex regex = new Regex(@"(\*{2})[ ]*(.+?)[ ]*\**\n+");
+            string result = text;
+            Match match;
+            
+            while ((match = regex.Match(text)).Success)
+            {
+                string replacement = string.Format("<strong>{0}</strong>", match.Groups[2].Value);
+                text = text.Replace(match.Value, "");
+                result = result.Replace(match.Value, replacement);
+            }
+
+            return result;
         }
     }
 }
