@@ -4,7 +4,10 @@
     {
         public string MarkdownToHtml(string md)
         {
-            return md;
+            BlockProcessor blockProcessor = new(md);
+            blockProcessor.Process();
+
+            return string.Empty;
         }
     }
 }
