@@ -2,5 +2,5 @@
 using System.Text.RegularExpressions;
 
 SharpDown.SharpDown convert = new SharpDown.SharpDown();
-string test = "# This is a test\n## Testing it";
+string test = "# This is a test\n# Testing it\n";
 convert.MarkdownToHtml(test);

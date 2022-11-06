@@ -21,9 +21,9 @@ namespace SharpDown
 
         public void Process()
         {
-            HeaderEvaluate(Markdown);
+            var text = HeaderEvaluate(Markdown);
 
-            //Console.WriteLine(text);
+            Console.WriteLine(text);
         }
 
         private string HtmlEvaluate(string text)
@@ -36,40 +36,27 @@ namespace SharpDown
             return text;
         }
 
+        /// <summary>
+        /// Replaces markdown headers with html headers
+        /// </summary>
+        /// <param name="text">Markdown text</param>
+        /// <returns>Text with only html headers</returns>
         private string HeaderEvaluate(string text)
         {
             Regex headerRegex = new Regex(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+");
-
             Match match = headerRegex.Match(text);
+            StringBuilder result = new();
 
-            if (!match.Success)
-                return text;
+            while (match.Success)
+            {
+                string replacement = string.Format("<h{0}>{1}</h{0}>\n", match.Groups[1].Value.Length, match.Groups[2].Value);
+                text = text.Replace(match.Value, "");
+                result.Append(replacement);
 
-            var level = match.Groups[1].Value.Count();
-            return "<h{0}>{1}</h{";
-        }
+                match = headerRegex.Match(text);
+            }
 
-        private static readonly Regex _headerAtx = new Regex(@"
-                ^(\#{1,6})  # $1 = string of #'s
-                [ ]*
-                (.+?)       # $2 = Header text
-                [ ]*
-                \#*         # optional closing #'s (not counted)
-                \n+",
-            RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-
-        private string SetextHeaderEvaluator(Match match)
-        {
-            var header = match.Groups[1].Value;
-            var level = match.Groups[2].Value.StartsWith("=") ? 1 : 2;
-            return string.Format("<h{1}>{0}</h{1}>\n\n", header, level);
-        }
-
-        private string AtxHeaderEvaluator(Match match)
-        {
-            var header = match.Groups[2].Value;
-            var level = match.Groups[1].Value.Length;
-            return string.Format("<h{1}>{0}</h{1}>\n\n", header, level);
+            return result.ToString();
         }
     }
 }
