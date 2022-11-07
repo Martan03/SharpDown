@@ -47,7 +47,7 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string HeaderEvaluate(string text)
         {
-            Regex regex = new(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"^(\#{1,6})[ ]+(.+?)[ ]*\#*\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             while ((match = regex.Match(text)).Success)
@@ -66,7 +66,7 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string BoldEvaluate(string text)
         {
-            Regex regex = new(@"\*\*(.*?)\*\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"(?:\*|_){2}(.*?)(?:\*|_){2}", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
             
             while ((match = regex.Match(text)).Success)
@@ -85,12 +85,12 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string ItalicEvaluate(string text)
         {
-            Regex regex = new(@"\*(.*?)\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"(?:\*|_)(.*?)(?:\*|_)", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             while ((match = regex.Match(text)).Success)
             {
-                string replacement = string.Format("<i>{0}</i>", match.Groups[1].Value);
+                string replacement = string.Format("<em>{0}</em>", match.Groups[1].Value);
                 text = text.Replace(match.Value, replacement);
             }
 
