@@ -23,6 +23,9 @@ namespace SharpDown
         {
             var text = HeaderEvaluate(Markdown);
             text = BoldEvaluate(text);
+            text = ItalicEvaluate(text);
+            text = UnorderedListEvaluate(text);
+            text = OrderedListEvaluate(text);
 
             Console.WriteLine(text);
         }
@@ -44,7 +47,7 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string HeaderEvaluate(string text)
         {
-            Regex regex = new Regex(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             while ((match = regex.Match(text)).Success)
@@ -63,7 +66,7 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string BoldEvaluate(string text)
         {
-            Regex regex = new Regex(@"\*\*(.*?)\*\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"\*\*(.*?)\*\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
             
             while ((match = regex.Match(text)).Success)
@@ -82,7 +85,7 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string ItalicEvaluate(string text)
         {
-            Regex regex = new Regex(@"\*(.*?)\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"\*(.*?)\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             while ((match = regex.Match(text)).Success)
@@ -94,5 +97,64 @@ namespace SharpDown
             return text;
         }
 
+        /// <summary>
+        /// Replaces markdown unordered list with html ul
+        /// </summary>
+        /// <param name="text">Text to be evaluated</param>
+        /// <returns>Result text after evaluation</returns>
+        private string UnorderedListEvaluate(string text)
+        {
+            Regex regex = new(@"^[ ]*([-*].)[ ]*(.+?)\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match match;
+
+            bool nested = false;
+
+            while ((match = regex.Match(text)).Success)
+            {
+                string replacement = string.Empty;
+                if (!nested)
+                    replacement += "<ul>\n";
+
+                replacement += string.Format("\t<li>{0}</li>\n", match.Groups[2].Value);
+
+                nested = !match.Groups[0].Value.EndsWith("\n\n");
+                if (!nested)
+                    replacement += "</ul>\n";
+
+                text = text.Replace(match.Value, replacement);
+            }
+
+            return text;
+        }
+
+        /// <summary>
+        /// Replaces markdown ordered list with html ol
+        /// </summary>
+        /// <param name="text">Text to be evaluated</param>
+        /// <returns>Result text after evaluation</returns>
+        private string OrderedListEvaluate(string text)
+        {
+            Regex regex = new(@"^[ ]*(\d+)\..[ ]*(.+?)\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match match;
+
+            bool nested = false;
+
+            while ((match = regex.Match(text)).Success)
+            {
+                string replacement = string.Empty;
+                if (!nested)
+                    replacement += "<ol>\n";
+
+                replacement += string.Format("\t<li>{0}</li>\n", match.Groups[2].Value);
+
+                nested = !match.Groups[0].Value.EndsWith("\n\n");+
+                if (!nested)
+                    replacement += "</ol>\n";
+
+                text = text.Replace(match.Value, replacement);
+            }
+
+            return text;
+        }
     }
 }
