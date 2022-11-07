@@ -16,9 +16,8 @@ namespace SharpDown
     internal class BlockProcessor
     {
         private string Markdown { get; set; }
-        private int liCount { get; set; } = 0;
         private int liIndent { get; set; } = 0;
-        private int listsNested { get; set; } = 0;
+        private List<string> listTypes { get; set; } = new List<string>();
 
         public BlockProcessor(string md)
         {
@@ -59,71 +58,14 @@ namespace SharpDown
             return regex.horizontalLineRegex.Replace(text, _HorizontalLineEvaluate);
         }
 
+        /// <summary>
+        /// Replaces markdown list with html list
+        /// </summary>
+        /// <param name="text">Text to be evaluated</param>
+        /// <returns>Result text after evaluation</returns>
         private string ListEvaluate(string text)
         {
             return regex.listRegex.Replace(text, _ListEvaluate);
-        }
-
-        /// <summary>
-        /// Replaces markdown unordered list with html ul
-        /// </summary>
-        /// <param name="text">Text to be evaluated</param>
-        /// <returns>Result text after evaluation</returns>
-        private string UnorderedListEvaluate(string text)
-        {
-            Regex regex = new(@"^[ ]*([-*].)[ ]*(.+?)\n+",
-                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match match;
-
-            bool nested = false;
-
-            while ((match = regex.Match(text)).Success)
-            {
-                string replacement = string.Empty;
-                if (!nested)
-                    replacement += "<ul>\n";
-
-                replacement += string.Format("\t<li>{0}</li>\n", match.Groups[2].Value);
-
-                nested = !match.Groups[0].Value.EndsWith("\n\n");
-                if (!nested)
-                    replacement += "</ul>\n";
-
-                text = text.Replace(match.Value, replacement);
-            }
-
-            return text;
-        }
-
-        /// <summary>
-        /// Replaces markdown ordered list with html ol
-        /// </summary>
-        /// <param name="text">Text to be evaluated</param>
-        /// <returns>Result text after evaluation</returns>
-        private string OrderedListEvaluate(string text)
-        {
-            Regex regex = new(@"^[ ]*(\d+)\..[ ]*(.+?)\n+",
-                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match match;
-
-            bool nested = false;
-
-            while ((match = regex.Match(text)).Success)
-            {
-                string replacement = string.Empty;
-                if (!nested)
-                    replacement += "<ol>\n";
-
-                replacement += string.Format("\t<li>{0}</li>\n", match.Groups[2].Value);
-
-                nested = !match.Groups[0].Value.EndsWith("\n\n");
-                if (!nested)
-                    replacement += "</ol>\n";
-
-                text = text.Replace(match.Value, replacement);
-            }
-
-            return text;
         }
 
         private string _HeaderEvaluate(Match match)
@@ -145,39 +87,44 @@ namespace SharpDown
 
         private string _ListEvaluate(Match match)
         {
-            var text = (liCount++ == 0) ? "<ul>\n" : "";
+            var text = string.Empty;
+            if (listTypes.Count == 0)
+            {
+                listTypes.Add(regex.orderedListRegex.IsMatch(match.Groups[2].Value) ? "ol" : "ul");
+                text = string.Format("<{0}>\n", listTypes.Last());
+            }
 
-            text += _ListCheckIndentation(match.Groups[1].Value.Length);
+            text += _ListCheckIndentation(match);
             text += _ListItemEvaluate(match.Groups[3].Value);
 
             if (match.Groups[0].Value.EndsWith("\n\n"))
             {
-                for (; listsNested >= 0; --listsNested)
-                    text += "</ul>\n";
-                liCount = 0;
+                for (; listTypes.Count > 0; listTypes.RemoveAt(listTypes.Count - 1))
+                    text += string.Format("</{0}>\n", listTypes.Last());
             }
             return text;
         }
 
         private string _ListItemEvaluate(string text)
         {
-            return string.Format("{0}<li>{1}</li>\n", IndentText(listsNested), text);
+            return string.Format("{0}<li>{1}</li>\n", IndentText(listTypes.Count - 1), text);
         }
 
-        private string _ListCheckIndentation(int value)
+        private string _ListCheckIndentation(Match match)
         {
             var text = string.Empty;
+            var value = match.Groups[1].Value.Length;
             if (value > liIndent)
             {
-                ++listsNested;
-                text = string.Format("{0}<ul>\n", IndentText(liIndent));
+                listTypes.Add(regex.orderedListRegex.IsMatch(match.Groups[2].Value) ? "ol" : "ul");
+                text = string.Format("{0}<{1}>\n", IndentText(liIndent), listTypes.Last());
                 liIndent = value;
             }
             else if (value < liIndent)
             {
-                --listsNested;
                 liIndent = value;
-                text = string.Format("{0}</ul>\n", IndentText(liIndent));
+                text = string.Format("{0}</{1}>\n", IndentText(liIndent), listTypes.Last());
+                listTypes.RemoveAt(listTypes.Count - 1);
             }
             return text;
         }

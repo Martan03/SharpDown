@@ -6,3 +6,6 @@ SharpDown test file
 - **First list item
   - This should be intended
 - *Second list item*
+
+1. test of the new feature
+2. second line
