@@ -147,7 +147,7 @@ namespace SharpDown
 
                 replacement += string.Format("\t<li>{0}</li>\n", match.Groups[2].Value);
 
-                nested = !match.Groups[0].Value.EndsWith("\n\n");+
+                nested = !match.Groups[0].Value.EndsWith("\n\n");
                 if (!nested)
                     replacement += "</ol>\n";
 
