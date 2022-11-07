@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
+using regex = SharpDown.ToHtmlRegex;
 
 namespace SharpDown
 {
     internal class BlockProcessor
     {
         private string Markdown { get; set; }
+        private int liCount { get; set; } = 0;
+        private int liIndent { get; set; } = 0;
+        private int listsNested { get; set; } = 0;
 
         public BlockProcessor(string md)
         {
@@ -21,21 +27,15 @@ namespace SharpDown
 
         public void Process()
         {
-            var text = HeaderEvaluate(Markdown);
+            var html = HeaderEvaluate(Markdown);
+            html = HorizontalLineEvaluate(html);
+            html = ListEvaluate(html);
+            /*
             text = UnorderedListEvaluate(text);
             text = OrderedListEvaluate(text);
+            var text = DoHeaders(Markdown);*/
 
-            Console.WriteLine(text);
-        }
-
-        private string HtmlEvaluate(string text)
-        {
-            for (int i = 0; i < text.Length; ++i)
-            {
-
-            }
-
-            return text;
+            Console.WriteLine(html);
         }
 
         /// <summary>
@@ -45,71 +45,23 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string HeaderEvaluate(string text)
         {
-            Regex regex = new(@"^(\#{1,6})[ ]+(.+?)[ ]*\#*\n+",
-                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match match;
-
-            while ((match = regex.Match(text)).Success)
-            {
-                string replacement = string.Format("<h{0}>{1}</h{0}>\n", match.Groups[1].Value.Length, SpanEvaluate(match.Groups[2].Value));
-                text = text.Replace(match.Value, replacement);
-            }
-
-            return text;
+            text = regex.headerRegex.Replace(text, _HeaderEvaluate);
+            return regex.headerAltRegex.Replace(text, _HeaderAltEvaluate);
         }
 
         /// <summary>
-        /// Replaces markdown bold text with html bold text
+        /// Replaces markdown horizontal line with html hr
         /// </summary>
         /// <param name="text">Text to be evaluated</param>
         /// <returns>Result text after evaluation</returns>
-        private string BoldEvaluate(string text)
-        {
-            Regex regex = new(@"(?:\*\*|__)((.|\s)*\S(.|\s)*)(?:\*\*|__)",
-                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match match;
-            
-            while ((match = regex.Match(text)).Success)
-            {
-                string replacement = string.Format("<strong>{0}</strong>", match.Groups[1].Value);
-                text = text.Replace(match.Value, replacement);
-            }
-
-            return text;
-        }
-
-        /// <summary>
-        /// Replaces markdown italic text with html italic text
-        /// </summary>
-        /// <param name="text">Text to be evaluated</param>
-        /// <returns>Result text after evaluation</returns>
-        private string ItalicEvaluate(string text)
-        {
-            Regex regex = new(@"(?:\*|_)((.|\s)*\S(.|\s)*)(?:\*|_)",
-                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match match;
-
-            while ((match = regex.Match(text)).Success)
-            {
-                string replacement = string.Format("<em>{0}</em>", match.Groups[1].Value);
-                text = text.Replace(match.Value, replacement);
-            }
-
-            return text;
-        }
-
         private string HorizontalLineEvaluate(string text)
         {
-            Regex regex = new(@"^[ ]{0,3}([-*_])(?>[ ]{0,2}\1){2,}[ ]*$",
-                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
-            Match match;
+            return regex.horizontalLineRegex.Replace(text, _HorizontalLineEvaluate);
+        }
 
-            while((match = regex.Match(text)).Success)
-            {
-                text = text.Replace(match.Value, "<hr />");
-            }
-            
-            return text;
+        private string ListEvaluate(string text)
+        {
+            return regex.listRegex.Replace(text, _ListEvaluate);
         }
 
         /// <summary>
@@ -131,7 +83,7 @@ namespace SharpDown
                 if (!nested)
                     replacement += "<ul>\n";
 
-                replacement += string.Format("\t<li>{0}</li>\n", BlockProcess(match.Groups[2].Value));
+                replacement += string.Format("\t<li>{0}</li>\n", match.Groups[2].Value);
 
                 nested = !match.Groups[0].Value.EndsWith("\n\n");
                 if (!nested)
@@ -174,20 +126,67 @@ namespace SharpDown
             return text;
         }
 
-        private string BlockProcess(string text)
+        private string _HeaderEvaluate(Match match)
         {
-            text = HeaderEvaluate(text);
-            text = UnorderedListEvaluate(text);
-            text = OrderedListEvaluate(text);
-            text = BoldEvaluate(text);
-            text = ItalicEvaluate(text);
+            return string.Format("<h{0}>{1}</h{0}>\n\n",
+                match.Groups[1].Value.Length, match.Groups[2].Value);
+        }
+
+        private string _HeaderAltEvaluate(Match match)
+        {
+            return string.Format("<h{0}>{1}</h{0}>\n\n",
+                match.Groups[2].Value.StartsWith("=") ? 1 : 2, match.Groups[1].Value);
+        }
+
+        private string _HorizontalLineEvaluate(Match match)
+        {
+            return "<hr />";
+        }
+
+        private string _ListEvaluate(Match match)
+        {
+            var text = (liCount++ == 0) ? "<ul>\n" : "";
+
+            text += _ListCheckIndentation(match.Groups[1].Value.Length);
+            text += _ListItemEvaluate(match.Groups[3].Value);
+
+            if (match.Groups[0].Value.EndsWith("\n\n"))
+            {
+                for (; listsNested >= 0; --listsNested)
+                    text += "</ul>\n";
+                liCount = 0;
+            }
             return text;
         }
 
-        private string SpanEvaluate(string text)
+        private string _ListItemEvaluate(string text)
         {
-            text = BoldEvaluate(text);
-            text = ItalicEvaluate(text);
+            return string.Format("{0}<li>{1}</li>\n", IndentText(listsNested), text);
+        }
+
+        private string _ListCheckIndentation(int value)
+        {
+            var text = string.Empty;
+            if (value > liIndent)
+            {
+                ++listsNested;
+                text = string.Format("{0}<ul>\n", IndentText(liIndent));
+                liIndent = value;
+            }
+            else if (value < liIndent)
+            {
+                --listsNested;
+                liIndent = value;
+                text = string.Format("{0}</ul>\n", IndentText(liIndent));
+            }
+            return text;
+        }
+
+        private string IndentText(int n)
+        {
+            string text = string.Empty;
+            for (; n >= 0; --n)
+                text += "    ";
             return text;
         }
     }
