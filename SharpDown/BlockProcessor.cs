@@ -22,8 +22,6 @@ namespace SharpDown
         public void Process()
         {
             var text = HeaderEvaluate(Markdown);
-            text = BoldEvaluate(text);
-            text = ItalicEvaluate(text);
             text = UnorderedListEvaluate(text);
             text = OrderedListEvaluate(text);
 
@@ -52,7 +50,7 @@ namespace SharpDown
 
             while ((match = regex.Match(text)).Success)
             {
-                string replacement = string.Format("<h{0}>{1}</h{0}>\n", match.Groups[1].Value.Length, match.Groups[2].Value);
+                string replacement = string.Format("<h{0}>{1}</h{0}>\n", match.Groups[1].Value.Length, SpanEvaluate(match.Groups[2].Value));
                 text = text.Replace(match.Value, replacement);
             }
 
@@ -66,7 +64,7 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string BoldEvaluate(string text)
         {
-            Regex regex = new(@"(?:\*|_){2}(.*?)(?:\*|_){2}", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"(?:\*|_){2}((.|\s)*\S(.|\s)*)(?:\*|_){2}", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
             
             while ((match = regex.Match(text)).Success)
@@ -85,7 +83,7 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string ItalicEvaluate(string text)
         {
-            Regex regex = new(@"(?:\*|_)(.*?)(?:\*|_)", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"(?:\*|_)((.|\s)*\S(.|\s)*)(?:\*|_)", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             while ((match = regex.Match(text)).Success)
@@ -115,7 +113,7 @@ namespace SharpDown
                 if (!nested)
                     replacement += "<ul>\n";
 
-                replacement += string.Format("\t<li>{0}</li>\n", match.Groups[2].Value);
+                replacement += string.Format("\t<li>{0}</li>\n", BlockProcess(match.Groups[2].Value));
 
                 nested = !match.Groups[0].Value.EndsWith("\n\n");
                 if (!nested)
@@ -154,6 +152,23 @@ namespace SharpDown
                 text = text.Replace(match.Value, replacement);
             }
 
+            return text;
+        }
+
+        private string BlockProcess(string text)
+        {
+            text = HeaderEvaluate(text);
+            text = UnorderedListEvaluate(text);
+            text = OrderedListEvaluate(text);
+            text = BoldEvaluate(text);
+            text = ItalicEvaluate(text);
+            return text;
+        }
+
+        private string SpanEvaluate(string text)
+        {
+            text = BoldEvaluate(text);
+            text = ItalicEvaluate(text);
             return text;
         }
     }
