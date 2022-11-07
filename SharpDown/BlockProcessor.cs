@@ -22,7 +22,6 @@ namespace SharpDown
         public void Process()
         {
             var text = HeaderEvaluate(Markdown);
-            Console.WriteLine(text);
             text = BoldEvaluate(text);
 
             Console.WriteLine(text);
@@ -41,8 +40,8 @@ namespace SharpDown
         /// <summary>
         /// Replaces markdown headers with html headers
         /// </summary>
-        /// <param name="text">Markdown text</param>
-        /// <returns>Text with only html headers</returns>
+        /// <param name="text">Text to be evaluated</param>
+        /// <returns>Result text after evaluation</returns>
         private string HeaderEvaluate(string text)
         {
             Regex regex = new Regex(@"^(\#{1,6})[ ]*(.+?)[ ]*\#*\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
@@ -57,6 +56,11 @@ namespace SharpDown
             return text;
         }
 
+        /// <summary>
+        /// Replaces markdown bold text with html bold text
+        /// </summary>
+        /// <param name="text">Text to be evaluated</param>
+        /// <returns>Result text after evaluation</returns>
         private string BoldEvaluate(string text)
         {
             Regex regex = new Regex(@"\*\*(.*?)\*\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
@@ -70,5 +74,25 @@ namespace SharpDown
 
             return text;
         }
+
+        /// <summary>
+        /// Replaces markdown italic text with html italic text
+        /// </summary>
+        /// <param name="text">Text to be evaluated</param>
+        /// <returns>Result text after evaluation</returns>
+        private string ItalicEvaluate(string text)
+        {
+            Regex regex = new Regex(@"\*(.*?)\*", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match match;
+
+            while ((match = regex.Match(text)).Success)
+            {
+                string replacement = string.Format("<i>{0}</i>", match.Groups[1].Value);
+                text = text.Replace(match.Value, replacement);
+            }
+
+            return text;
+        }
+
     }
 }
