@@ -45,7 +45,8 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string HeaderEvaluate(string text)
         {
-            Regex regex = new(@"^(\#{1,6})[ ]+(.+?)[ ]*\#*\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"^(\#{1,6})[ ]+(.+?)[ ]*\#*\n+",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             while ((match = regex.Match(text)).Success)
@@ -64,7 +65,8 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string BoldEvaluate(string text)
         {
-            Regex regex = new(@"(?:\*|_){2}((.|\s)*\S(.|\s)*)(?:\*|_){2}", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"(?:\*\*|__)((.|\s)*\S(.|\s)*)(?:\*\*|__)",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
             
             while ((match = regex.Match(text)).Success)
@@ -83,7 +85,8 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string ItalicEvaluate(string text)
         {
-            Regex regex = new(@"(?:\*|_)((.|\s)*\S(.|\s)*)(?:\*|_)", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"(?:\*|_)((.|\s)*\S(.|\s)*)(?:\*|_)",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             while ((match = regex.Match(text)).Success)
@@ -95,6 +98,20 @@ namespace SharpDown
             return text;
         }
 
+        private string HorizontalLineEvaluate(string text)
+        {
+            Regex regex = new(@"^[ ]{0,3}([-*_])(?>[ ]{0,2}\1){2,}[ ]*$",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Match match;
+
+            while((match = regex.Match(text)).Success)
+            {
+                text = text.Replace(match.Value, "<hr />");
+            }
+            
+            return text;
+        }
+
         /// <summary>
         /// Replaces markdown unordered list with html ul
         /// </summary>
@@ -102,7 +119,8 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string UnorderedListEvaluate(string text)
         {
-            Regex regex = new(@"^[ ]*([-*].)[ ]*(.+?)\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"^[ ]*([-*].)[ ]*(.+?)\n+",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             bool nested = false;
@@ -132,7 +150,8 @@ namespace SharpDown
         /// <returns>Result text after evaluation</returns>
         private string OrderedListEvaluate(string text)
         {
-            Regex regex = new(@"^[ ]*(\d+)\..[ ]*(.+?)\n+", RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+            Regex regex = new(@"^[ ]*(\d+)\..[ ]*(.+?)\n+",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
             Match match;
 
             bool nested = false;
