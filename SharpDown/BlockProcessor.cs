@@ -29,10 +29,6 @@ namespace SharpDown
             var html = HeaderEvaluate(Markdown);
             html = HorizontalLineEvaluate(html);
             html = ListEvaluate(html);
-            /*
-            text = UnorderedListEvaluate(text);
-            text = OrderedListEvaluate(text);
-            var text = DoHeaders(Markdown);*/
 
             Console.WriteLine(html);
         }
@@ -100,14 +96,14 @@ namespace SharpDown
             if (match.Groups[0].Value.EndsWith("\n\n"))
             {
                 for (; listTypes.Count > 0; listTypes.RemoveAt(listTypes.Count - 1))
-                    text += string.Format("</{0}>\n", listTypes.Last());
+                    text += string.Format("{0}</{1}>\n", IndentText(listTypes.Count - 1), listTypes.Last());
             }
             return text;
         }
 
         private string _ListItemEvaluate(string text)
         {
-            return string.Format("{0}<li>{1}</li>\n", IndentText(listTypes.Count - 1), text);
+            return string.Format("{0}<li>{1}</li>\n", IndentText(listTypes.Count), text);
         }
 
         private string _ListCheckIndentation(Match match)
@@ -117,13 +113,13 @@ namespace SharpDown
             if (value > liIndent)
             {
                 listTypes.Add(regex.orderedListRegex.IsMatch(match.Groups[2].Value) ? "ol" : "ul");
-                text = string.Format("{0}<{1}>\n", IndentText(liIndent), listTypes.Last());
+                text = string.Format("{0}<{1}>\n", IndentText(listTypes.Count - 1), listTypes.Last());
                 liIndent = value;
             }
             else if (value < liIndent)
             {
                 liIndent = value;
-                text = string.Format("{0}</{1}>\n", IndentText(liIndent), listTypes.Last());
+                text = string.Format("{0}</{1}>\n", IndentText(listTypes.Count - 1), listTypes.Last());
                 listTypes.RemoveAt(listTypes.Count - 1);
             }
             return text;
@@ -132,7 +128,7 @@ namespace SharpDown
         private string IndentText(int n)
         {
             string text = string.Empty;
-            for (; n >= 0; --n)
+            for (; n > 0; --n)
                 text += "    ";
             return text;
         }
