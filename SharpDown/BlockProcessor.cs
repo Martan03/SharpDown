@@ -238,7 +238,7 @@ namespace SharpDown
 
         private string _LinkEvaluate(Match match)
         {
-            return string.Format("<a href=\"{0}\">{1}</a>", match.Groups[2].Value, match.Groups[1].Value);
+            return string.Format("<a href=\"{0}\" title=\"{1}\">{2}</a>", match.Groups[2].Value, match.Groups[3].Value, match.Groups[1].Value);
         }
         #endregion
 

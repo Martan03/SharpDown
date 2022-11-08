@@ -15,5 +15,5 @@ SharpDown test file
 >> test of nested block quote
 > back to the first one
 
-[Duck Duck Go](https://duckduckgo.com)
+[Duck Duck Go](https://duckduckgo.com Best search engine)
 
