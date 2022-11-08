@@ -110,7 +110,7 @@ namespace SharpDown
 
         private string _ListItemEvaluate(string text)
         {
-            return string.Format("{0}<li>{1}</li>\n", IndentText(listTypes.Count), text);
+            return string.Format("{0}<li>{1}</li>\n", IndentText(listTypes.Count), _SpanEvaluate(text));
         }
 
         private string _ListCheckIndentation(Match match)
@@ -136,7 +136,7 @@ namespace SharpDown
         {
             string text = _BlockQuoteCheckIndentation(match);
 
-            text += string.Format("{0}{1}\n", IndentText(blockQuoteIndent), match.Groups[3].Value);
+            text += string.Format("{0}{1}\n", IndentText(blockQuoteIndent), _SpanEvaluate(match.Groups[3].Value));
 
             if (match.Groups[0].Value.EndsWith("\n\n"))
             {
@@ -162,6 +162,22 @@ namespace SharpDown
                 blockQuoteIndent = match.Groups[1].Value.Length;
             }
             return text;
+        }
+
+        private string _SpanEvaluate(string text)
+        {
+            text = regex.boldRegex.Replace(text, _BoldEvaluate);
+            return regex.italicRegex.Replace(text, _ItalicEvaluate);
+        }
+
+        private string _BoldEvaluate(Match match)
+        {
+            return string.Format("<strong>{0}</strong>", match.Groups[1].Value);
+        }
+
+        private string _ItalicEvaluate(Match match)
+        {
+            return string.Format("<em>{0}</em>", match.Groups[1].Value);
         }
 
         private string IndentText(int n)
