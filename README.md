@@ -6,7 +6,7 @@ Todo:
 - [x] Headings
 - [ ] Paragraphs
 - [ ] Line Breaks
-- [ ] Bold, Italic
+- [x] Bold, Italic
 - [x] Blockquote
 - [x] Lists (ordered and unordered)
 - [ ] Code Block
