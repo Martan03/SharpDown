@@ -166,8 +166,15 @@ namespace SharpDown
 
         private string _SpanEvaluate(string text)
         {
+            text = regex.boldalicRegex.Replace(text, _BoldalicEvaluate);
             text = regex.boldRegex.Replace(text, _BoldEvaluate);
             return regex.italicRegex.Replace(text, _ItalicEvaluate);
+
+        }
+
+        private string _BoldalicEvaluate(Match match)
+        {
+            return string.Format("<em><strong>{0}</strong></em>", match.Groups[1].Value);
         }
 
         private string _BoldEvaluate(Match match)
