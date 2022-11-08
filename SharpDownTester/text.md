@@ -4,8 +4,6 @@ SharpDown test file
 ## Test of list
 
 - **First list item
-  random text here
-- Another line
   - This should be intended
     1. ordered list
 - *Second list item*
@@ -16,4 +14,6 @@ SharpDown test file
 > ***test of block quote***
 >> test of nested block quote
 > back to the first one
+
+[Duck Duck Go](https://duckduckgo.com)
 
