@@ -10,3 +10,7 @@ SharpDown test file
 
 1. test of the new feature
 2. second line
+
+> test of block quote
+>> test of nested block quote
+> back to the first one

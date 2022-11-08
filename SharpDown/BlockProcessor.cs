@@ -18,6 +18,7 @@ namespace SharpDown
         private string Markdown { get; set; }
         private int liIndent { get; set; } = 0;
         private List<string> listTypes { get; set; } = new List<string>();
+        private int blockQuoteIndent { get; set; } = 0;
 
         public BlockProcessor(string md)
         {
@@ -29,6 +30,7 @@ namespace SharpDown
             var html = HeaderEvaluate(Markdown);
             html = HorizontalLineEvaluate(html);
             html = ListEvaluate(html);
+            html = BlockQuoteEvaluate(html);
 
             Console.WriteLine(html);
         }
@@ -62,6 +64,11 @@ namespace SharpDown
         private string ListEvaluate(string text)
         {
             return regex.listRegex.Replace(text, _ListEvaluate);
+        }
+
+        private string BlockQuoteEvaluate(string text)
+        {
+            return regex.blockQuoteRegex.Replace(text, _BlockQuoteEvaluate);
         }
 
         private string _HeaderEvaluate(Match match)
@@ -121,6 +128,38 @@ namespace SharpDown
                 liIndent = value;
                 text = string.Format("{0}</{1}>\n", IndentText(listTypes.Count - 1), listTypes.Last());
                 listTypes.RemoveAt(listTypes.Count - 1);
+            }
+            return text;
+        }
+
+        private string _BlockQuoteEvaluate(Match match)
+        {
+            string text = _BlockQuoteCheckIndentation(match);
+
+            text += string.Format("{0}{1}\n", IndentText(blockQuoteIndent), match.Groups[3].Value);
+
+            if (match.Groups[0].Value.EndsWith("\n\n"))
+            {
+                for (; blockQuoteIndent > 0; --blockQuoteIndent)
+                    text += string.Format("{0}</blockquote>\n", IndentText(blockQuoteIndent - 1));
+            }
+            return text;
+        }
+
+        private string _BlockQuoteCheckIndentation(Match match)
+        {
+            string text = string.Empty;
+            if (match.Groups[1].Value.Length > blockQuoteIndent)
+            {
+                for (int i = match.Groups[1].Value.Length - blockQuoteIndent; i > 0; --i)
+                    text += string.Format("{0}<blockquote>\n", IndentText(blockQuoteIndent));
+                blockQuoteIndent = match.Groups[1].Value.Length;
+            }
+            else if (match.Groups[1].Value.Length < blockQuoteIndent)
+            {
+                for (int i = blockQuoteIndent - match.Groups[1].Value.Length; i > 0; --i)
+                    text += string.Format("{0}</blockquote>\n", IndentText(blockQuoteIndent - 1));
+                blockQuoteIndent = match.Groups[1].Value.Length;
             }
             return text;
         }

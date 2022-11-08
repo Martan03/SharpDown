@@ -27,6 +27,9 @@ namespace SharpDown
         public static readonly Regex unorderedListRegex = new(@"[-*].",
                 RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
+        public static readonly Regex blockQuoteRegex = new(@"^(>+)([ ]*)(.+?)\n+",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+
         public static readonly Regex boldRegex = new(@"(?:\*\*|__)((.|\s)*\S(.|\s)*)(?:\*\*|__)",
                 RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
