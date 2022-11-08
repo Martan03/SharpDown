@@ -17,6 +17,7 @@ namespace SharpDown
     {
         private string Markdown { get; set; }
         private int liIndent { get; set; } = 0;
+        private bool liLast { get; set; } = false;
         private List<string> listTypes { get; set; } = new List<string>();
         private int blockQuoteIndent { get; set; } = 0;
 
@@ -47,7 +48,7 @@ namespace SharpDown
         }
 
         /// <summary>
-        /// Replaces markdown horizontal line with html hr
+        /// Replaces markdown horizontal rule with html hr
         /// </summary>
         /// <param name="text">Text to be evaluated</param>
         /// <returns>Result text after evaluation</returns>
@@ -66,10 +67,17 @@ namespace SharpDown
             return regex.listRegex.Replace(text, _ListEvaluate);
         }
 
+        /// <summary>
+        /// Replaces markdown blockquote with html blockquote
+        /// </summary>
+        /// <param name="text">Text to be evaluated</param>
+        /// <returns>Result text after evaluation</returns>
         private string BlockQuoteEvaluate(string text)
         {
             return regex.blockQuoteRegex.Replace(text, _BlockQuoteEvaluate);
         }
+
+        #region Header evaluation help functions
 
         private string _HeaderEvaluate(Match match)
         {
@@ -82,11 +90,17 @@ namespace SharpDown
             return string.Format("<h{0}>{1}</h{0}>\n\n",
                 match.Groups[2].Value.StartsWith("=") ? 1 : 2, match.Groups[1].Value);
         }
+        #endregion
+
+        #region Horizontal rule evaluation help function
 
         private string _HorizontalLineEvaluate(Match match)
         {
             return "<hr />";
         }
+        #endregion
+
+        #region List evaluation help functions
 
         private string _ListEvaluate(Match match)
         {
@@ -102,15 +116,25 @@ namespace SharpDown
 
             if (match.Groups[0].Value.EndsWith("\n\n"))
             {
+                text += _ListItemClosing(listTypes.Count);
+                liLast = false;
                 for (; listTypes.Count > 0; listTypes.RemoveAt(listTypes.Count - 1))
-                    text += string.Format("{0}</{1}>\n", IndentText(listTypes.Count - 1), listTypes.Last());
+                    text += string.Format("{0}</{1}>\n", 
+                        IndentText(listTypes.Count - 1),
+                        listTypes.Last());
             }
             return text;
         }
 
         private string _ListItemEvaluate(string text)
         {
-            return string.Format("{0}<li>{1}</li>\n", IndentText(listTypes.Count), _SpanEvaluate(text));
+            string liClosing = _ListItemClosing(listTypes.Count);
+            liLast = true;
+            return string.Format("{0}{1}<li>\n{2}{3}\n", 
+                liClosing, 
+                IndentText(listTypes.Count), 
+                IndentText(listTypes.Count + 1),
+                _SpanEvaluate(text));
         }
 
         private string _ListCheckIndentation(Match match)
@@ -120,17 +144,33 @@ namespace SharpDown
             if (value > liIndent)
             {
                 listTypes.Add(regex.orderedListRegex.IsMatch(match.Groups[2].Value) ? "ol" : "ul");
-                text = string.Format("{0}<{1}>\n", IndentText(listTypes.Count - 1), listTypes.Last());
+                text = string.Format("{0}{1}<{2}>\n",
+                    _ListItemClosing(listTypes.Count - 1),
+                    IndentText(listTypes.Count - 1),
+                    listTypes.Last());
+                liLast = false;
                 liIndent = value;
             }
             else if (value < liIndent)
             {
                 liIndent = value;
-                text = string.Format("{0}</{1}>\n", IndentText(listTypes.Count - 1), listTypes.Last());
+                text = string.Format("{0}{1}</{2}>\n",
+                    _ListItemClosing(listTypes.Count),
+                    IndentText(listTypes.Count - 1),
+                    listTypes.Last());
+                liLast = false;
                 listTypes.RemoveAt(listTypes.Count - 1);
             }
             return text;
         }
+
+        private string _ListItemClosing(int n)
+        {
+            return liLast ? string.Format("{0}</li>\n", IndentText(n)) : string.Empty;
+        }
+        #endregion
+
+        #region BlockQuote evaluation help functions
 
         private string _BlockQuoteEvaluate(Match match)
         {
@@ -163,14 +203,9 @@ namespace SharpDown
             }
             return text;
         }
+        #endregion
 
-        private string _SpanEvaluate(string text)
-        {
-            text = regex.boldalicRegex.Replace(text, _BoldalicEvaluate);
-            text = regex.boldRegex.Replace(text, _BoldEvaluate);
-            return regex.italicRegex.Replace(text, _ItalicEvaluate);
-
-        }
+        #region Boldalic, Bold and Italic evaluation help functions
 
         private string _BoldalicEvaluate(Match match)
         {
@@ -185,6 +220,15 @@ namespace SharpDown
         private string _ItalicEvaluate(Match match)
         {
             return string.Format("<em>{0}</em>", match.Groups[1].Value);
+        }
+        #endregion
+
+        private string _SpanEvaluate(string text)
+        {
+            text = regex.boldalicRegex.Replace(text, _BoldalicEvaluate);
+            text = regex.boldRegex.Replace(text, _BoldEvaluate);
+            return regex.italicRegex.Replace(text, _ItalicEvaluate);
+
         }
 
         private string IndentText(int n)

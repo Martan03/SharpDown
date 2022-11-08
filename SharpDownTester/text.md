@@ -4,6 +4,8 @@ SharpDown test file
 ## Test of list
 
 - **First list item
+  random text here
+- Another line
   - This should be intended
     1. ordered list
 - *Second list item*

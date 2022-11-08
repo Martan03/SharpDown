@@ -9,6 +9,9 @@ namespace SharpDown
 {
     public class ToHtmlRegex
     {
+        public static readonly Regex hardBreak = new(@"\n.",
+                RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+
         public static readonly Regex headerRegex = new(@"^(\#{1,6})[ ]+(.+?)[ ]*\#*\n+",
                 RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
@@ -18,13 +21,13 @@ namespace SharpDown
         public static readonly Regex horizontalLineRegex = new(@"^[ ]{0,3}([-*_])(?>[ ]{0,2}\1){2,}[ ]*$",
                 RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
-        public static readonly Regex listRegex = new(@"^([ ]*)([-*].|\d+\..)[ ]*(.+?)\n+",
+        public static readonly Regex listRegex = new(@"^([ ]*)([-\+\*].|\d+\..)[ ]*(.+?)\n+",
                 RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         public static readonly Regex orderedListRegex = new(@"\d+\..",
                 RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
-        public static readonly Regex unorderedListRegex = new(@"[-*].",
+        public static readonly Regex unorderedListRegex = new(@"[-\+\*].",
                 RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
         public static readonly Regex blockQuoteRegex = new(@"^(>+)([ ]*)(.+?)\n+",
