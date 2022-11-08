@@ -248,8 +248,8 @@ namespace SharpDown
                 text = text.TrimEnd() + "<br />";
             text = regex.boldalicRegex.Replace(text, _BoldalicEvaluate);
             text = regex.boldRegex.Replace(text, _BoldEvaluate);
-            return regex.italicRegex.Replace(text, _ItalicEvaluate);
-
+            text = regex.italicRegex.Replace(text, _ItalicEvaluate);
+            return regex.linkRegex.Replace(text, _LinkEvaluate);
         }
 
         private string IndentText(int n)
