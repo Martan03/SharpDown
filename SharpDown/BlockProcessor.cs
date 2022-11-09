@@ -274,8 +274,15 @@ namespace SharpDown
 
         private string _SpanEvaluate(string text)
         {
+            Console.WriteLine(text);
             while (text.EndsWith("\n"))
                 text = text.Remove(text.Length - 1);
+
+            if (text.EndsWith("  "))
+            {
+                text = text.Remove(text.Length - 2);
+                text += "<br />";
+            }
 
             text = text.Replace("  \n", "<br />\n");
             text = regex.boldalicRegex.Replace(text, _BoldalicEvaluate);

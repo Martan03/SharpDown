@@ -3,12 +3,13 @@ SharpDown test file
 
 ## Test of list
 
-- **First list item
+- **First list item  
+  another line
   - This should be intended
     1. ordered list
 - *Second list item*
 
-paragraph
+paragraph  
 [My github](https://github.com/Martan03 Check it out)
 Another **line** of *paragraph*
 
