@@ -265,16 +265,18 @@ namespace SharpDown
         }
         #endregion
 
+        #region Paragraph evaluation help function
+
         private string _ParagraphEvaluate(Match match)
         {
             if (string.Equals(match.Groups[1].Value, "\n"))
                 return match.Groups[1].Value;
             return string.Format("<p>\n{0}\n</p>\n", _SpanEvaluate(match.Groups[1].Value));
         }
+        #endregion
 
         private string _SpanEvaluate(string text)
         {
-            Console.WriteLine(text);
             while (text.EndsWith("\n"))
                 text = text.Remove(text.Length - 1);
 
