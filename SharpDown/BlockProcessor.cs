@@ -26,16 +26,16 @@ namespace SharpDown
             Markdown = md;
         }
 
-        public void Process()
+        public string Process()
         {
-            var html = HeaderEvaluate(Markdown);
-            html = HorizontalLineEvaluate(html);
-            html = ListEvaluate(html);
-            html = BlockQuoteEvaluate(html);
-            html = ImageEvaluate(html);
-            html = LinkEvaluate(html);
+            Markdown = HeaderEvaluate(Markdown);
+            Markdown = HorizontalLineEvaluate(Markdown);
+            Markdown = ListEvaluate(Markdown);
+            Markdown = BlockQuoteEvaluate(Markdown);
+            Markdown = ImageEvaluate(Markdown);
+            Markdown = LinkEvaluate(Markdown);
 
-            Console.WriteLine(html);
+            return Markdown;
         }
 
         /// <summary>

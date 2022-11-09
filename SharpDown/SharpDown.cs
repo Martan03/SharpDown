@@ -6,15 +6,14 @@ namespace SharpDown
     {
         public string MarkdownToHtml(string md)
         {
-            BlockProcessor blockProcessor = new(md);
-            blockProcessor.Process();
-
-            return string.Empty;
+            BlockProcessor blockProcessor = new(Prepare(md));
+            return blockProcessor.Process();
         }
 
         private string Prepare(string text)
         {
-            text = ToHtmlRegex.hardBreak.Replace(text, "<br />");
+            text = text.Replace("\r", "");
+            text += "\n\n";
             return text;
         }
     }
