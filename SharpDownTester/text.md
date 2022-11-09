@@ -9,7 +9,8 @@ SharpDown test file
 - *Second list item*
 
 paragraph
-Another line of paragraph
+[My github](https://github.com/Martan03 Check it out)
+Another **line** of *paragraph*
 
 1. test of the new feature
 2. **second line**

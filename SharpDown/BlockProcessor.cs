@@ -32,8 +32,6 @@ namespace SharpDown
             Markdown = HorizontalLineEvaluate(Markdown);
             Markdown = ListEvaluate(Markdown);
             Markdown = BlockQuoteEvaluate(Markdown);
-            Markdown = ImageEvaluate(Markdown);
-            Markdown = LinkEvaluate(Markdown);
             Markdown = ParagraphEvaluate(Markdown);
 
             return Markdown;
@@ -271,16 +269,20 @@ namespace SharpDown
         {
             if (string.Equals(match.Groups[1].Value, "\n"))
                 return match.Groups[1].Value;
-            return string.Format("<p>\n{0}\n</p>\n", match.Groups[1].Value);
+            return string.Format("<p>\n{0}\n</p>\n", _SpanEvaluate(match.Groups[1].Value));
         }
 
         private string _SpanEvaluate(string text)
         {
+            while (text.EndsWith("\n"))
+                text = text.Remove(text.Length - 1);
+
             text = text.Replace("  \n", "<br />\n");
             text = regex.boldalicRegex.Replace(text, _BoldalicEvaluate);
             text = regex.boldRegex.Replace(text, _BoldEvaluate);
             text = regex.italicRegex.Replace(text, _ItalicEvaluate);
-            return regex.linkRegex.Replace(text, _LinkEvaluate);
+            text = ImageEvaluate(text);
+            return LinkEvaluate(text);
         }
 
         private string IndentText(int n)

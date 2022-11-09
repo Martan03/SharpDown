@@ -48,7 +48,7 @@ namespace SharpDown
         public static readonly Regex linkRegex = new(@"(?:\[(.+?)\])(?:\((\S+)(?:[ ]+(.+?))?\))",
                 RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
-        public static readonly Regex paragraphRegex = new(@"^[ ]*([^<]+)\n{2,}",
+        public static readonly Regex paragraphRegex = new(@"^[ ]*([^<]+)\n{2}",
                 RegexOptions.Multiline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
     }
 }

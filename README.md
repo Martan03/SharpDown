@@ -4,7 +4,7 @@ C# library for converting Markdown to HTML
 
 Todo:
 - [x] Headings
-- [ ] Paragraphs
+- [x] Paragraphs
 - [ ] Line Breaks
 - [x] Bold, Italic
 - [x] Blockquote
