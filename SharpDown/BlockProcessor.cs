@@ -78,6 +78,11 @@ namespace SharpDown
             return regex.blockQuoteRegex.Replace(text, _BlockQuoteEvaluate);
         }
 
+        private string ImageEvaluate(string text)
+        {
+            return regex.imageRegex.Replace(text, _ImageEvaluate);
+        }
+
         /// <summary>
         /// Replaces markdown link with html link
         /// </summary>
@@ -231,6 +236,14 @@ namespace SharpDown
         private string _ItalicEvaluate(Match match)
         {
             return string.Format("<em>{0}</em>", match.Groups[1].Value);
+        }
+        #endregion
+
+        #region Image evaluation help functions
+
+        private string _ImageEvaluate(Match match)
+        {
+            return string.Empty;
         }
         #endregion
 

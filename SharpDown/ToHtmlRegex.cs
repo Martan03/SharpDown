@@ -42,6 +42,9 @@ namespace SharpDown
         public static readonly Regex italicRegex = new(@"(?:\*|_)((.|\s)*\S(.|\s)*)(?:\*|_)",
                 RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
 
+        public static readonly Regex imageRegex = new(@"(?:!\[(.+?)\])(.+?)",
+                RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
+
         public static readonly Regex linkRegex = new(@"(?:\[(.+?)\])(?:\((\S+)(?:[ ]+(.+?))?\))",
                 RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled);
     }
