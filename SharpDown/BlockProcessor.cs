@@ -32,6 +32,7 @@ namespace SharpDown
             html = HorizontalLineEvaluate(html);
             html = ListEvaluate(html);
             html = BlockQuoteEvaluate(html);
+            html = ImageEvaluate(html);
             html = LinkEvaluate(html);
 
             Console.WriteLine(html);
@@ -243,7 +244,7 @@ namespace SharpDown
 
         private string _ImageEvaluate(Match match)
         {
-            return string.Empty;
+            return string.Format("<img href=\"{0}\" alt=\"{1}\" />", match.Groups[2].Value, match.Groups[1].Value);
         }
         #endregion
 

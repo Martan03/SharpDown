@@ -11,6 +11,6 @@ Todo:
 - [x] Lists (ordered and unordered)
 - [ ] Code Block
 - [ ] Code
-- [ ] Images
+- [x] Images
 - [x] Horizontal Rules
 - [x] Links
