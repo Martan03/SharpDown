@@ -34,6 +34,7 @@ namespace SharpDown
             Markdown = BlockQuoteEvaluate(Markdown);
             Markdown = ImageEvaluate(Markdown);
             Markdown = LinkEvaluate(Markdown);
+            Markdown = ParagraphEvaluate(Markdown);
 
             return Markdown;
         }
@@ -92,6 +93,16 @@ namespace SharpDown
         private string LinkEvaluate(string text)
         {
             return regex.linkRegex.Replace(text, _LinkEvaluate);
+        }
+
+        /// <summary>
+        /// Replaces markdown paragraph with html paragraph
+        /// </summary>
+        /// <param name="text">Text to be evaluated</param>
+        /// <returns>Result text after evaluation</returns>
+        private string ParagraphEvaluate(string text)
+        {
+            return regex.paragraphRegex.Replace(text, _ParagraphEvaluate);
         }
 
         #region Header evaluation help functions
@@ -256,10 +267,16 @@ namespace SharpDown
         }
         #endregion
 
+        private string _ParagraphEvaluate(Match match)
+        {
+            if (string.Equals(match.Groups[1].Value, "\n"))
+                return match.Groups[1].Value;
+            return string.Format("<p>\n{0}\n</p>\n", match.Groups[1].Value);
+        }
+
         private string _SpanEvaluate(string text)
         {
-            if (text.EndsWith("  "))
-                text = text.TrimEnd() + "<br />";
+            text = text.Replace("  \n", "<br />\n");
             text = regex.boldalicRegex.Replace(text, _BoldalicEvaluate);
             text = regex.boldRegex.Replace(text, _BoldEvaluate);
             text = regex.italicRegex.Replace(text, _ItalicEvaluate);

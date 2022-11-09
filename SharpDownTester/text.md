@@ -8,6 +8,9 @@ SharpDown test file
     1. ordered list
 - *Second list item*
 
+paragraph
+Another line of paragraph
+
 1. test of the new feature
 2. **second line**
 
