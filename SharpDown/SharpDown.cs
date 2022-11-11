@@ -12,7 +12,8 @@ namespace SharpDown
 
         private string Prepare(string text)
         {
-            text = text.Replace("\r", "");
+            text = text.Replace("\r\n", "\n");
+            text = text.Replace("\r", "\n");
             text += "\n\n";
             return text;
         }
