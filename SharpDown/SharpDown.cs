@@ -6,6 +6,8 @@ namespace SharpDown
     {
         public string MarkdownToHtml(string md)
         {
+            if (string.IsNullOrEmpty(md))
+                return string.Empty;
             BlockProcessor blockProcessor = new(Prepare(md));
             return blockProcessor.Process();
         }
