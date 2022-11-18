@@ -253,7 +253,7 @@ namespace SharpDown
 
         private string _ImageEvaluate(Match match)
         {
-            return string.Format("<img href=\"{0}\" alt=\"{1}\" />", match.Groups[2].Value, match.Groups[1].Value);
+            return string.Format("<br/>\n<img src=\"{0}\" alt=\"{1}\" />", match.Groups[2].Value, match.Groups[1].Value);
         }
         #endregion
 
